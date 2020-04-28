@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+<title>Tune Chakras</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+article {
+    text-align: center;
+}
+body {
+    background-color: black;
+}
+#mandala {
+    margin-left: -50%;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+@media (max-width: 800px) {
+
+}
+</style>
+
+<body>
+
+<article>
+<p>
+<select id="chakra">
+    <option value="">Choose Chakra</option>
+    <option value="396">Root Chakra</option>
+    <option value="417">Sacral Chakra</option>
+    <option value="528">Solar Plexus Chakra</option>
+    <option value="639">Heart Chakra</option>
+    <option value="741">Throat Chakra</option>
+    <option value="852">Third Eye Chakra</option>
+    <option value="963">The Crown Chakra</option>
+</select>
+</p>
+
+<p>
+<select id="organ">
+    <option value="0.0">Choose Organ</option>
+    <option value="2.1">Lung</option>
+    <option value="1.8">Colon</option>
+    <option value="2.2">Spleen</option>
+    <option value="2.2">Stomach</option>
+    <option value="2.1">Heart</option>
+    <option value="2.0">Small Intestine</option>
+    <option value="2.0">Kidney</option>
+    <option value="1.86667">Bladder</option>
+    <option value="2.93333">Pericardium</option>
+    <option value="2.53333">San Jiao (Triple Heater)</option>
+    <option value="1.8">Liver</option>
+    <option value="2.0">Gallbladder</option>
+    <option value="1.73333">Ren Mai (Conceptor Vessel)</option>
+    <option value="1.73333">Du Mai (Governing Vessel)</option>
+</select>
+</p>
+
+<img id="mandala" src="chakra/No_Mandala.svg" alt="Muladhara Mandala">
+
+</article>
+
+<script>
+var audioContext, osc1, oscVol, osc2, on = false, quiet = true, maxVol = 0.2;
+
+var colors = [
+    "black",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "indigo",
+    "violet"
+];
+
+var mandalas = [
+    "No",
+    "Muladhara",
+    "Swadhisthana",
+    "Manipura",
+    "Anahata",
+    "Vishuddha",
+    "Ajna",
+    "Sahasrara"
+];
+
+function init() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    osc1 = audioContext.createOscillator();
+    osc2 = audioContext.createOscillator();
+    oscVol = audioContext.createGain();
+
+    osc1.connect(oscVol);
+    osc2.connect(oscVol);
+    oscVol.connect(audioContext.destination);
+    oscVol.gain.value = 0.0;
+    oscVol.gain.setValueAtTime(0, audioContext.currentTime);
+    osc1.start();
+    osc2.start();
+}
+
+function changeChakra(freq, organ) {
+    var binFreq = 0.0;
+    if (!on) {
+        init();
+        on = true;
+    }
+    var chakraIndex = document.getElementById("chakra").selectedIndex;
+    document.getElementById("mandala").src = "chakra/" + mandalas[chakraIndex] + "_Mandala.svg";
+    document.body.style.backgroundColor = colors[chakraIndex];
+
+    if (!chakra) {
+        oscVol.gain.value = maxVol;
+        oscVol.gain.linearRampToValueAtTime(0.0, audioContext.currentTime + 0.5);
+        quiet = true;
+    } else {
+        if (!quiet) {
+            oscVol.gain.value = maxVol;
+        }
+
+        freq = parseFloat(freq);
+        binFreq = parseFloat(organ);
+
+        quiet = false;
+        oscVol.gain.linearRampToValueAtTime(0.0, audioContext.currentTime + 0.5);
+        osc1.frequency.setValueAtTime(freq - binFreq / 2, audioContext.currentTime + 0.5);
+        osc2.frequency.setValueAtTime(freq + binFreq / 2, audioContext.currentTime + 0.5);
+        oscVol.gain.linearRampToValueAtTime(maxVol, audioContext.currentTime + 1.0);
+        oscVol.gain.setValueAtTime(maxVol, audioContext.currentTime + 1.0);
+    }
+}
+
+document.getElementById("chakra").onchange = function () {
+    changeChakra(this.value, document.getElementById("organ").value);
+};
+
+document.getElementById("organ").onchange = function () {
+    changeChakra(document.getElementById("chakra").value, this.value);
+};
+
+</script>
